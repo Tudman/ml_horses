@@ -5,7 +5,7 @@
 ### If no excptions, parse the page and loop through the races collecting data
 ### Data can go into a python native DB: Sqlite3.
 ### ML stuff to come later.
-# yay, us
+# yay, us!
 
 import bs4 # this is the html parser, beautiful soup. Is a seperate module.
 import urllib.request #this is pythons in-distro the web fetcher.
