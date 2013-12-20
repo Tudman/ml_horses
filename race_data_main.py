@@ -114,9 +114,41 @@ def getRaceDetails(race_header):
 
 def getRaceRunnerDetails(race_runner):
     # save to db details of an individual runner in a race
-    #print(type(race_runner))
-    #if race_runner.tr['class'] == 'EvenRow' or race_runner.tr['class'] == 'OddRow':
-    #    print('things')
+    # if we've got a 'class' attribute, we're looking at a runner row.
+    if race_runner.has_attr('class'):
+        td_tag = race_runner.td
+        td_tag = td_tag.next_sibling.next_sibling
+        finish_position = td_tag.text
+        td_tag = td_tag.next_sibling.next_sibling.next_sibling.next_sibling
+        runner_number = td_tag.text
+        td_tag = td_tag.next_sibling.next_sibling
+        runner_name = td_tag.text
+        td_tag = td_tag.next_sibling.next_sibling
+        trainer_name = td_tag.text
+        td_tag = td_tag.next_sibling.next_sibling
+        jockey_name = td_tag.text
+        td_tag = td_tag.next_sibling.next_sibling
+        margin_to_winner = td_tag.text
+        td_tag = td_tag.next_sibling.next_sibling
+        barrier = td_tag.text
+        td_tag = td_tag.next_sibling.next_sibling
+        weight = td_tag.text
+        td_tag = td_tag.next_sibling.next_sibling
+        penalty = td_tag.text
+        td_tag = td_tag.next_sibling.next_sibling
+        starting_price = td_tag.text
+
+        # save to db
+        print('Finish Position: ' + finish_position)
+        print('Number: ' + runner_number)
+        print('Runner Name: ' + runner_name)
+        print('Trainer Name: ' + trainer_name)
+        print('Jockey Name: ' + jockey_name)
+        print('Margin to Winner: ' + margin_to_winner)
+        print('Barrier: ' + barrier)
+        print('Weight: ' + weight)
+        print('Penalty: ' + penalty)
+        print('Starting Price: ' + starting_price)
 
     return 1
 
