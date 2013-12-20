@@ -112,7 +112,7 @@ def getRaceDetails(race_header):
     # return Race Number for reference when getting runners
     return race_name_elements[0].strip()
 
-def getRaceRunnerDetails(race_runner):
+def getRaceRunnerDetails(race_runner, race_number):
     # save to db details of an individual runner in a race
     # if we've got a 'class' attribute, we're looking at a runner row.
     if race_runner.has_attr('class'):
@@ -152,11 +152,11 @@ def getRaceRunnerDetails(race_runner):
 
     return 1
 
-def getRaceRunners(race_runners):
+def getRaceRunners(race_runners, race_number):
     # iterate through runners
     runners_soup = bs4.BeautifulSoup(str(race_runners))
     for runners_row in runners_soup.findAll('tr'):
-        getRaceRunnerDetails(runners_row)
+        getRaceRunnerDetails(runners_row, race_number)
 
     return 1
 
@@ -174,12 +174,14 @@ def getRaceMeetResults(pageURL, state):
     getRaceMeetDetails(soup, meetDetails)
 
     flag_runner_table_next = 0
+    race_number = ''
+
     # iterate through race meet races
     for table_tag in soup.findAll('table'):
         # see if this table_tagle flagged as runners
         if flag_runner_table_next == 1:
             # get the runners for the race
-            getRaceRunners(table_tag)
+            getRaceRunners(table_tag, race_number)
             # reset flag
             flag_runner_table_next = 0
 
@@ -210,6 +212,11 @@ for state in states:
             # check if we've got this race meet's data yet
             if needToGetRaceMeet('http://risa.com.au' + link.get('href'), state):
                 getRaceMeetResults('http://risa.com.au' + link.get('href'), state)
+
+
+
+
+
 
 
 
