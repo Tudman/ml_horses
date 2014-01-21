@@ -24,11 +24,11 @@ It can also be re-run if you'd like to drop and re-create the tables from scratc
 TG 15-Jan-14
 *************/
 
- DROP TABLE IF EXISTS Stage.Runner;
- DROP TABLE IF EXISTS Stage.Race;
- DROP TABLE IF EXISTS Stage.RaceMeeting;
+ DROP TABLE IF EXISTS "Stage".Runner;
+ DROP TABLE IF EXISTS "Stage".Race;
+ DROP TABLE IF EXISTS "Stage".RaceMeeting;
   
-CREATE TABLE stage.racemeeting
+CREATE TABLE "Stage".racemeeting
 (
   racemeetingid serial NOT NULL,
   location character varying(100),
@@ -49,10 +49,10 @@ CREATE TABLE stage.racemeeting
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE stage.racemeeting
+ALTER TABLE "Stage".racemeeting
   OWNER TO etl;
 
-CREATE TABLE stage.race
+CREATE TABLE "Stage".race
 (
   raceid serial NOT NULL,
   racemeetingid bigint,
@@ -69,15 +69,15 @@ CREATE TABLE stage.race
   created timestamp without time zone NOT NULL,
   CONSTRAINT pk_race PRIMARY KEY (raceid),
   CONSTRAINT race_racemeetingid_fkey FOREIGN KEY (racemeetingid)
-      REFERENCES stage.racemeeting (racemeetingid) MATCH SIMPLE
+      REFERENCES "Stage".racemeeting (racemeetingid) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE Stage.Race OWNER TO etl;
+ALTER TABLE "Stage".Race OWNER TO etl;
 
-CREATE TABLE stage.runner
+CREATE TABLE "Stage".runner
 (
   runnerid serial NOT NULL,
   raceid bigint,
@@ -95,11 +95,11 @@ CREATE TABLE stage.runner
   created timestamp without time zone NOT NULL,
   CONSTRAINT pk_runner PRIMARY KEY (runnerid),
   CONSTRAINT runner_raceid_fkey FOREIGN KEY (raceid)
-      REFERENCES stage.race (raceid) MATCH SIMPLE
+      REFERENCES "Stage".race (raceid) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (
   OIDS=FALSE
 );
-ALTER TABLE stage.runner
+ALTER TABLE "Stage".runner
   OWNER TO etl;
