@@ -25,7 +25,7 @@ import re
 #dbconnstr = 'DRIVER={SQL Server Native Client 10.0};SERVER=.\SQLExpress;DATABASE=dw;UID=etl;PWD=etlpass'
 
 from race_data_postgres import *
-dbconnstr = 'dbname=dw user=etl password=etlpass'
+dbconnstr = "host ='localhost' dbname='dw' user='etl' password='etl'"
 
 
 
@@ -149,7 +149,7 @@ def needToGetMeet(pageURL, state, con):
     else:
         #print('meet does not exist')
         return 1
-    #return not checkMeetExists([location, short_state, date_thing], con)
+    return not checkMeetExists([location, short_state, date_thing], con)
 
 def getMeet(pageURL, state, con):
     # build URL, get print version

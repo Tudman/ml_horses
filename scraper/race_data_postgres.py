@@ -12,7 +12,7 @@ def checkMeetExists(meet_details, con):#dbconnstr):
     # return EXISTS meet
     cur = con.cursor()
     cur.execute("SELECT 1 " \
-                "FROM Stage.RaceMeeting " \
+                "FROM ""Stage"".racemeeting"" " \
                 "WHERE LTRIM(RTRIM(location)) = '" + meet_details[0] + "' " \
                 "AND state = '" + meet_details[1] + "' " \
                 "AND meetingdate = '" + meet_details[2] + "' " \
@@ -21,6 +21,7 @@ def checkMeetExists(meet_details, con):#dbconnstr):
 
 def saveMeetDetails(meet_details, source, con):#dbconnstr):
     # save the race meet details to the db and return the ID of the just added meet
+	
 
 ##    print('Year: ' + meet_details[0])
 ##    print('Month: ' + meet_details[1])
@@ -37,8 +38,8 @@ def saveMeetDetails(meet_details, source, con):#dbconnstr):
 ##    print('Comments: ' + meet_details[12])
 
     cur = con.cursor()
-    cur.execute("INSERT INTO Stage.RaceMeeting ( " \
-        "Location, State, MeetingDate, IsTrial, RailPosition, " \
+    cur.execute("INSERT INTO ""Stage"".racemeeting ( " \
+        "location, state, meetingdate, istrial, railposition, " \
         "TrackCondition, TrackType, Weather, Penetrometer, " \
         "ResultsLastPublished, Comments, Source, Created) VALUES ( " \
         "'" + meet_details[4] + "', " \
@@ -57,7 +58,7 @@ def saveMeetDetails(meet_details, source, con):#dbconnstr):
     con.commit()
 
     # return MeetID
-    cur.execute("SELECT MAX(RaceMeetingID) AS id FROM Stage.RaceMeeting")
+    cur.execute("SELECT MAX(RaceMeetingID) AS id FROM ""Stage"".racemeeting")
     meet_id = cur.fetchone()
     return meet_id[0]
 
@@ -75,9 +76,9 @@ def saveRaceDetails(race_details, meet_id, source, con):#dbconnstr):
 ##    print ('Official Comments: ' + race_details[8])
  
     cur = con.cursor()
-    cur.execute("INSERT INTO Stage.Race ( " \
-        "RaceMeetingID, RaceNumber, RaceTime, RaceName, RaceDistance, " \
-        "RaceDetails, TrackCondition, WinningTime, LastSplitTime, " \
+    cur.execute("INSERT INTO ""Stage"".race ( " \
+        "racemeetingID, racenumber, racetime, racename, racedistance, " \
+        "raceDetails, trackCondition, winningtime, lastsplittime, " \
         "OfficialComments, Source, Created) VALUES ( " \
         "'" + str(meet_id) + "', " \
         "'" + race_details[0] + "', " \
@@ -92,7 +93,8 @@ def saveRaceDetails(race_details, meet_id, source, con):#dbconnstr):
         "'" + source + "', " \
         "now())")
     con.commit()
-    
+	
+   
     # return RaceID
     cur.execute("SELECT MAX(RaceID) AS id FROM Stage.Race")
     race_id = cur.fetchone()
@@ -131,4 +133,5 @@ def saveRunnerDetails(runner_details, race_id, source, con):#dbconnstr):
         "'" + source + "', " \
         "now())")
     con.commit()
+	
     return 1
