@@ -1,0 +1,5 @@
+import bs4
+import urllib
+test_page = 'http://www.racenet.com.au/horse-racing-results/Lismore/2014-2-1'
+test_page = urllib.request.urlopen(test_page)
+soup = bs4.BeautifulSoup(test_page)

@@ -10,6 +10,7 @@
 import bs4 # this is the html parser, beautiful soup. Is a seperate module.
 import urllib.request #this is python's in-distro web fetcher.
 import re
+import datetime
 
 
 
@@ -31,12 +32,43 @@ dbconnstr = "host ='localhost' dbname='dw' user='etl' password='etl'"
 
 # function definitions. prob put these in a separate library file at some stage
 
-def getRunnerDetails(row, race_id, con):
-    
+def getRunnerDetails(row, race_id, winning_time, con):
+
+
+    #ST - some changes made here -
+	### - added winning_time var as arg.
+	### - dictionary to margin code into lengths.
+	### - will convert lengths into seconds.
+	### - added the start on rolling margin logic for first 3 horses.
+	### will require some restructuring, as row's aren't entirely independent, but are treated as such and winning time is worked out later.
+	### I'll maybe create and instantiate a class to hold some values a bit outside the program flow.
+	
+	'''
+    rolling_margin = 0
+	
+	recode_time_lookup = dict('HH' : 0, 'NK' : 0, 'SHH' : 0, 'HD' : 0, 'NS' : 0, 'HN' : 0, 'LH' : 0, 'LN' : 0, 'SN' : 0, 'SH' :0, 'LR' : 0, 'DH' : 0, 'DQ' : 0)
+    '''
+	
     td_tags = row.find_all('td')
     finish_position = td_tags[0].text.replace('\\r\\n', '').strip()
+		
     margin_to_winner = td_tags[1].text.replace('\\r\\n', '').strip()
-    name_elements = td_tags[2].text.replace('\\r\\n', '').strip().split('.')
+    
+	'''	
+	if finish_position = 2 or 3:
+	    margin_to_winner = rolling_margin + margin_to_winner		
+	    rolling_margin = margin_to_winner
+	'''
+    #convert winning_time to integer based in seconds. Maybe better done earlier and passed as an arg into this function
+	'''
+	winning_time = winning_time[:-1:]
+	time_convert = datetime.datetime.strptime(t, "%M:%S.%f")
+	winning_time = (time_convert.minute * 60) + time_convert.second + time_convert.microsecond/1000000
+	race_time = winning_time + (margin_to_winner * 0.14)
+	'''
+	
+	
+	name_elements = td_tags[2].text.replace('\\r\\n', '').strip().split('.')
     runner_number = name_elements[0].strip()
     runner_name = name_elements[1].strip()
     trainer_name = td_tags[3].text.replace('\\r\\n', '').strip()
@@ -46,7 +78,7 @@ def getRunnerDetails(row, race_id, con):
 
     # save to db
     return saveRunnerDetails([finish_position, runner_number, runner_name, trainer_name,
-                                  jockey_name, margin_to_winner, '-1', weight, '',
+                                  jockey_name, margin_to_winner, race_time, '-1', weight, '',
                                   starting_price], race_id, 'Racenet', con)
 
 def getRaceDetails(race_header, meet_id, con):
@@ -159,9 +191,9 @@ def getMeet(pageURL, state, con):
         pageURL = "http://www.racenet.com.au" + pageURL
         # put a try-catch around this as sometimes there's an error
         try:
-            page_data = str(urllib.request.urlopen(pageURL).read())
-            page_data = page_data.replace('</b> </b>', '</b>')
-            page_data = page_data.replace('        </b></td>', '        </td>')
+            page_data = urllib.request.urlopen(pageURL)
+            # (I think something here was breaking it ST) page_data = page_data.replace('</b> </b>', '</b>')
+            # (I think something here was breaking it ST) page_data = page_data.replace('        </b></td>', '        </td>')
             soup = bs4.BeautifulSoup(page_data)
             meet_id = getRaceMeetDetails(soup.title.text, state, con)
             # now get race details

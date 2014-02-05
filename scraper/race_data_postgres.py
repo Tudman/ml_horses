@@ -117,7 +117,7 @@ def saveRunnerDetails(runner_details, race_id, source, con):#dbconnstr):
     cur = con.cursor()
     cur.execute("INSERT INTO Stage.Runner ( " \
         "RaceID, Result, Number, Horse, Trainer, " \
-        "Jockey, Margin, Barrier, Weight, " \
+        "Jockey, Margin, Time, Barrier, Weight, " \
         "Penalty, StartingPrice, Source, Created) VALUES ( """ \
         "'" + str(race_id) + "', " \
         "'" + runner_details[0] + "', " \
@@ -130,6 +130,7 @@ def saveRunnerDetails(runner_details, race_id, source, con):#dbconnstr):
         "'" + runner_details[7] + "'," \
         "'" + runner_details[8] + "', " \
         "'" + runner_details[9] + "', " \
+		"'" + runner_details[10] + "', " \
         "'" + source + "', " \
         "now())")
     con.commit()
