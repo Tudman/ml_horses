@@ -41,34 +41,42 @@ def getRunnerDetails(row, race_id, winning_time, con):
 	### - will convert lengths into seconds.
 	### - added the start on rolling margin logic for first 3 horses.
 	### will require some restructuring, as row's aren't entirely independent, but are treated as such and winning time is worked out later.
-	### I'll maybe create and instantiate a class to hold some values a bit outside the program flow.
+	### I'll maybe create and instantiate a class to hold some values a bit outside the program flow - I've done this.
 	
-	'''
-    rolling_margin = 0
-	
-	recode_time_lookup = dict('HH' : 0, 'NK' : 0, 'SHH' : 0, 'HD' : 0, 'NS' : 0, 'HN' : 0, 'LH' : 0, 'LN' : 0, 'SN' : 0, 'SH' :0, 'LR' : 0, 'DH' : 0, 'DQ' : 0)
-    '''
 	
     td_tags = row.find_all('td')
     finish_position = td_tags[0].text.replace('\\r\\n', '').strip()
 		
     margin_to_winner = td_tags[1].text.replace('\\r\\n', '').strip()
     
-	'''	
-	if finish_position = 2 or 3:
-	    margin_to_winner = rolling_margin + margin_to_winner		
-	    rolling_margin = margin_to_winner
-	'''
+    #converting margin to winner
+    
+    if margin_to_winner in glo_var.recode_time_lookup:
+    	margin_to_winner = glo_var.recode_time_lookup(margin_to_winner)
+    else:
+    	margin_to_winner = int(margin_to_winner[:-1:])
+    
+    
+    #sort out rolling margin
+    
+    if finish_position = 1:
+        glo_var.rolling_margin = 0
+    
+    if finish_position = 2 or 3:
+	margin_to_winner = glo_var.rolling_margin + margin_to_winner		
+	glo_var.rolling_margin = margin_to_winner
+	    
     #convert winning_time to integer based in seconds. Maybe better done earlier and passed as an arg into this function
-	'''
-	winning_time = winning_time[:-1:]
-	time_convert = datetime.datetime.strptime(t, "%M:%S.%f")
-	winning_time = (time_convert.minute * 60) + time_convert.second + time_convert.microsecond/1000000
-	race_time = winning_time + (margin_to_winner * 0.14)
-	'''
+	
+    winning_time = glo_var.win_time
+    winning_time = winning_time[:-1:]
+    time_convert = datetime.datetime.strptime(t, "%M:%S.%f")
+    winning_time = (time_convert.minute * 60) + time_convert.second + time_convert.microsecond/1000000
+    race_time = winning_time + (margin_to_winner * 0.14)
+
 	
 	
-	name_elements = td_tags[2].text.replace('\\r\\n', '').strip().split('.')
+    name_elements = td_tags[2].text.replace('\\r\\n', '').strip().split('.')
     runner_number = name_elements[0].strip()
     runner_name = name_elements[1].strip()
     trainer_name = td_tags[3].text.replace('\\r\\n', '').strip()
@@ -206,7 +214,7 @@ def getMeet(pageURL, state, con):
                 elif row.has_attr('class'):
                     if row['class'][0] == 'again_bg_table':
                         # its a runner row. get Runner details
-                        getRunnerDetails(row, race_id, con)
+                        getRunnerDetails(row, race_id, glovar.winning_time, con)
 
         except Exception:
             print(str(Exception))
@@ -229,6 +237,12 @@ def getLocationMeetDates(pageURL, state, con):
         getMeet(link.get('href'), state, con)
 
 
+#small class to hold some globals, as all vars invoked only exist with function instance.
+
+class glo_var:
+	winning_time = ''
+	rolling_margin = 0
+	recode_time_lookup = dict('HH' : 0, 'NK' : 0, 'SHH' : 0, 'HD' : 0, 'NS' : 0, 'HN' : 0, 'LH' : 0, 'LN' : 0, 'SN' : 0, 'SH' :0, 'LR' : 0, 'DH' : 0, 'DQ' : 0)
 
 
 # actual script starts here
@@ -255,7 +269,7 @@ for state in states:
             menudiv = soup1.find('div', id = "left_menu")
         # if still None, something is crap
         if menudiv == None:
-            # Hawkesbury and "Toowoomba cushion raceclub" seem to have special pages. well fuck them
+            # Hawkesbury and "Toowoomba cushion raceclub" seem to have special pages. well fuck them (lol. st)
             print('STUPID SPECIAL PAGE ' + page)
         else:
             if menudiv.li == None:
@@ -263,3 +277,4 @@ for state in states:
             else:
                 page = menudiv.li.a.get('href')
             getLocationMeetDates(page, state, con)
+    con.commit()    
