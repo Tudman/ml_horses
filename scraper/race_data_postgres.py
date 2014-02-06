@@ -38,7 +38,7 @@ def saveMeetDetails(meet_details, source, con):#dbconnstr):
 ##    print('Comments: ' + meet_details[12])
 
     cur = con.cursor()
-    cur.execute("INSERT INTO ""Stage"".racemeeting ( " \
+    cur.execute("INSERT INTO stage.racemeeting ( " \
         "location, state, meetingdate, istrial, railposition, " \
         "TrackCondition, TrackType, Weather, Penetrometer, " \
         "ResultsLastPublished, Comments, Source, Created) VALUES ( " \
@@ -55,10 +55,10 @@ def saveMeetDetails(meet_details, source, con):#dbconnstr):
         "'" + meet_details[12] + "', " \
         "'" + source + "', " \
         "now())")
-    con.commit()
+    # commenting this out, committing at the end of the whole process may be a lot quicker... con.commit()
 
     # return MeetID
-    cur.execute("SELECT MAX(RaceMeetingID) AS id FROM ""Stage"".racemeeting")
+    cur.execute("SELECT MAX(RaceMeetingID) AS id FROM "stage.racemeeting")
     meet_id = cur.fetchone()
     return meet_id[0]
 
@@ -76,7 +76,7 @@ def saveRaceDetails(race_details, meet_id, source, con):#dbconnstr):
 ##    print ('Official Comments: ' + race_details[8])
  
     cur = con.cursor()
-    cur.execute("INSERT INTO ""Stage"".race ( " \
+    cur.execute("INSERT INTO stage.race ( " \
         "racemeetingID, racenumber, racetime, racename, racedistance, " \
         "raceDetails, trackCondition, winningtime, lastsplittime, " \
         "OfficialComments, Source, Created) VALUES ( " \
@@ -92,11 +92,14 @@ def saveRaceDetails(race_details, meet_id, source, con):#dbconnstr):
         "'" + race_details[8].replace("'", "''") + "', " \
         "'" + source + "', " \
         "now())")
-    con.commit()
+        
+        glo_var.race_time = race_details[1]
+    
+    # commenting this out, committing at the end of the whole process may be a lot quicker... con.commit()
 	
    
     # return RaceID
-    cur.execute("SELECT MAX(RaceID) AS id FROM Stage.Race")
+    cur.execute("SELECT MAX(RaceID) AS id FROM "stage.race")
     race_id = cur.fetchone()
     return race_id[0]
 
@@ -115,7 +118,7 @@ def saveRunnerDetails(runner_details, race_id, source, con):#dbconnstr):
 ##    print('Starting Price: ' + runner_details[9])
 
     cur = con.cursor()
-    cur.execute("INSERT INTO Stage.Runner ( " \
+    cur.execute("INSERT INTO stage.runner ( " \
         "RaceID, Result, Number, Horse, Trainer, " \
         "Jockey, Margin, Time, Barrier, Weight, " \
         "Penalty, StartingPrice, Source, Created) VALUES ( """ \
@@ -133,6 +136,6 @@ def saveRunnerDetails(runner_details, race_id, source, con):#dbconnstr):
 		"'" + runner_details[10] + "', " \
         "'" + source + "', " \
         "now())")
-    con.commit()
+    # commenting this out, committing at the end of the whole process may be a lot quicker... con.commit()
 	
     return 1
