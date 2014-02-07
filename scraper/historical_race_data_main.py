@@ -32,50 +32,57 @@ dbconnstr = "host ='localhost' dbname='dw' user='etl' password='etl'"
 
 # function definitions. prob put these in a separate library file at some stage
 
-def getRunnerDetails(row, race_id, winning_time, con):
-
+def getRunnerDetails(row, race_id, con, win_time):
 
     #ST - some changes made here -
-	### - added winning_time var as arg.
-	### - dictionary to margin code into lengths.
-	### - will convert lengths into seconds.
-	### - added the start on rolling margin logic for first 3 horses.
-	### will require some restructuring, as row's aren't entirely independent, but are treated as such and winning time is worked out later.
-	### I'll maybe create and instantiate a class to hold some values a bit outside the program flow - I've done this.
-	
-	
+    ### - added winning_time var as arg.
+    ### - dictionary to margin code into lengths.
+    ### - will convert lengths into seconds.
+    ### - added the start on rolling margin logic for first 3 horses.
+    ### will require some restructuring, as row's aren't entirely independent, but are treated as such and winning time is worked out later.
+    ### I'll maybe create and instantiate a class to hold some values a bit outside the program flow - I've done this.
+
+
     td_tags = row.find_all('td')
     finish_position = td_tags[0].text.replace('\\r\\n', '').strip()
-		
+
     margin_to_winner = td_tags[1].text.replace('\\r\\n', '').strip()
-    
+
+
     #converting margin to winner
     
-    if margin_to_winner in glo_var.recode_time_lookup:
-    	margin_to_winner = glo_var.recode_time_lookup(margin_to_winner)
-    else:
-    	margin_to_winner = int(margin_to_winner[:-1:])
-    
+    if margin_to_winner in recode_time_lookup:
+        margin_to_winner = recode_time_lookup[margin_to_winner]
+    if margin_to_winner == '':
+        margin_to_winner = 0
     
     #sort out rolling margin
     
-    if finish_position = 1:
-        glo_var.rolling_margin = 0
-    
-    if finish_position = 2 or 3:
-	margin_to_winner = glo_var.rolling_margin + margin_to_winner		
-	glo_var.rolling_margin = margin_to_winner
-	    
-    #convert winning_time to integer based in seconds. Maybe better done earlier and passed as an arg into this function
-	
-    winning_time = glo_var.win_time
-    winning_time = winning_time[:-1:]
-    time_convert = datetime.datetime.strptime(t, "%M:%S.%f")
-    winning_time = (time_convert.minute * 60) + time_convert.second + time_convert.microsecond/1000000
-    race_time = winning_time + (margin_to_winner * 0.14)
+    global rolling_margin
+  
+    if finish_position == '2':
+        margin_to_winner = float(margin_to_winner)        
+        rolling_margin = margin_to_winner
 
-	
-	
+
+    if finish_position == '3':
+        margin_to_winner = float(rolling_margin) + float(margin_to_winner)
+        rolling_margin = 0
+    
+    #convert winning_time to numeric and minutes to 60 seconds
+
+    winning_time = win_time
+    winning_time = winning_time[1:-1:]
+
+    time_convert = datetime.datetime.strptime(winning_time, "%M:%S.%f")
+    
+    winning_time = (time_convert.minute * 60) + time_convert.second + time_convert.microsecond/1000000
+    
+    race_time = winning_time + (float(margin_to_winner) * 0.14)
+    race_time = str(race_time)
+    
+    margin_to_winner = str(margin_to_winner)
+    
     name_elements = td_tags[2].text.replace('\\r\\n', '').strip().split('.')
     runner_number = name_elements[0].strip()
     runner_name = name_elements[1].strip()
@@ -105,24 +112,31 @@ def getRaceDetails(race_header, meet_id, con):
     # move to next tr to get more race details
     race_header2 = race_header.next_sibling.next_sibling
     race_details = race_header2.text
-    race_details = race_details.replace('Class:', '|')
-    race_details = race_details.replace('Track:', '|')
-    race_details = race_details.replace('Time:', '|')
-    race_details = race_details.replace('Class:', '|')
-    race_details = race_details.replace('\\r\\n', '|')
+    print(race_details)
+    race_details = race_details.replace('<b>','').strip()
+    race_details = race_details.replace('</b>','').strip()
+    race_details = race_details.replace('\n', '|').strip()
+    race_details = race_details.replace('<br />','').strip()
+    race_details = race_details.replace('Class:', '|').strip()
+    race_details = race_details.replace('Track:', '|').strip()
+    race_details = race_details.replace('Time:', '|').strip()
+    race_details = race_details.replace('Sectional Time:', '|').strip()
+    race_details = race_details.replace('Prizemoney: ', '|').strip()
     race_details_elements = race_details.split('|')
-    race_details = race_details_elements[2]
-    track_condition = race_details_elements[3]
-    race_time = race_details_elements[4]
+    print(race_details_elements)
+    race_details = race_details_elements[1]
+    track_condition = race_details_elements[2]
+    race_time = race_details_elements[3]
     race_comments = ''
     if len(race_details_elements) >= 8:
         race_comments = race_details_elements[7]
-    
-    return saveRaceDetails([race_number.strip(), '1-1-1900',
-                                race_name.strip(), race_distance.strip(),
-                                race_details.strip(), track_condition.strip(),
-                                race_time.strip(), '',
-                                race_comments.strip()], meet_id, 'Racenet', con)
+
+
+    return saveRaceDetails([race_number, '1-1-1900',
+                                race_name, race_distance,
+                                race_details, track_condition,
+                                race_time, '',
+                                race_comments], meet_id, 'Racenet', con)
 
 
 def getRaceMeetDetails(page_title, state, con):
@@ -198,27 +212,30 @@ def getMeet(pageURL, state, con):
         pageURL = pageURL.replace('horse-racing-results', 'horse-racing-results-print')
         pageURL = "http://www.racenet.com.au" + pageURL
         # put a try-catch around this as sometimes there's an error
-        try:
-            page_data = urllib.request.urlopen(pageURL)
-            # (I think something here was breaking it ST) page_data = page_data.replace('</b> </b>', '</b>')
-            # (I think something here was breaking it ST) page_data = page_data.replace('        </b></td>', '        </td>')
-            soup = bs4.BeautifulSoup(page_data)
-            meet_id = getRaceMeetDetails(soup.title.text, state, con)
-            # now get race details
-            table_rows = soup.find_all('tr')
-            for row in table_rows:
-                # if the row's class == "again_bg_table" it's a runner row
-                if row.th != None:
-                    # start of race header. get Race Details
-                    race_id = getRaceDetails(row, meet_id, con)
-                elif row.has_attr('class'):
-                    if row['class'][0] == 'again_bg_table':
-                        # its a runner row. get Runner details
-                        getRunnerDetails(row, race_id, glovar.winning_time, con)
+        #try:
+        page_data = urllib.request.urlopen(pageURL)
+        #page_data = page_data.replace('</b> </b>', '</b>')
+        #page_data = page_data.replace('        </b></td>', '        </td>')
+        soup = bs4.BeautifulSoup(page_data)
+        meet_id = getRaceMeetDetails(soup.title.text, state, con)
+        # now get race details
+        table_rows = soup.find_all('tr')
+        print (len(table_rows))
+        for row in table_rows:
+            # if the row's class == "again_bg_table" it's a runner row
+            if row.th != None:
+                # start of race header. get Race Details
+                detail_vars = getRaceDetails(row, meet_id, con)
+                race_id = detail_vars[0]
+                win_time = detail_vars[1]
+            elif row.has_attr('class'):
+                if row['class'][0] == 'again_bg_table':
+                    # its a runner row. get Runner details
+                    getRunnerDetails(row, race_id, con, win_time)
 
-        except Exception:
-            print(str(Exception))
-            print(pageURL)
+        #except Exception:
+        #    print(str(Exception))
+        #    print(pageURL)
             #raise
             #sys.exit('stopped.')
         #finally:
@@ -239,22 +256,26 @@ def getLocationMeetDates(pageURL, state, con):
 
 #small class to hold some globals, as all vars invoked only exist with function instance.
 
-class glo_var:
-	winning_time = ''
-	rolling_margin = 0
-	recode_time_lookup = dict('HH' : 0, 'NK' : 0, 'SHH' : 0, 'HD' : 0, 'NS' : 0, 'HN' : 0, 'LH' : 0, 'LN' : 0, 'SN' : 0, 'SH' :0, 'LR' : 0, 'DH' : 0, 'DQ' : 0)
+
+
 
 
 # actual script starts here
 
 # get database connection
 con = getConnection(dbconnstr)
+
+global rolling_margin
+rolling_margin = 0
+global recode_time_lookup
+recode_time_lookup = {'HH' : 0.1, 'NK' : 0.3, 'SHH' : 0.1, 'HD' : 0.2, 'NS' : 0.1, 'HN' : 0.2, 'LH' : 0.3, 'LN' : 0.4, 'SN' : 0.2, 'SH' :0.2, 'LR' : 0.5, 'DH' : 0.2, 'DQ' : 0}
+
 # get page with all the race locations in australia
 states = ['nsw', 'victoria', 'queensland', 'act', 'south-australian', 'western-australian', 'northern-territory', 'tasmanian']
 for state in states:
     # get list of race locations for each state
     page ="http://www.racenet.com.au/raceclub-category-pages/" + state + "-racing-clubs.asp"
-    print(page)
+    #print(page)
     page_data = urllib.request.urlopen(page)
     soup = bs4.BeautifulSoup(page_data)
 
@@ -277,4 +298,3 @@ for state in states:
             else:
                 page = menudiv.li.a.get('href')
             getLocationMeetDates(page, state, con)
-    con.commit()    
