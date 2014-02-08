@@ -11,6 +11,7 @@ def getConnection(dbconnstr):
 def checkMeetExists(meet_details, con):#dbconnstr):
     # return EXISTS meet
     cur = con.cursor()
+   
     cur.execute("SELECT 1 " \
                 "FROM stage.racemeeting " \
                 "WHERE LTRIM(RTRIM(location)) = '" + meet_details[0] + "' " \
@@ -38,9 +39,11 @@ def saveMeetDetails(meet_details, source, con):#dbconnstr):
 ##    print('Comments: ' + meet_details[12])
 
     cur = con.cursor()
+
+    
     cur.execute("INSERT INTO stage.racemeeting ( " \
         "location, state, meetingdate, istrial, railposition, " \
-        "TrackCondition, TrackType, Weather, Penetrometer, " \
+        "trackcondition, trackType, weather, penetrometer, " \
         "ResultsLastPublished, Comments, Source, Created) VALUES ( " \
         "'" + meet_details[4] + "', " \
         "'" + meet_details[3] + "', " \
@@ -79,7 +82,7 @@ def saveRaceDetails(race_details, meet_id, source, con):#dbconnstr):
     cur = con.cursor()
     cur.execute("INSERT INTO stage.race ( " \
         "racemeetingID, racenumber, racename, racedistance, " \
-        "trackCondition, winningtime, " \
+        "trackcondition, winningtime, " \
         "Source, Created) VALUES ( " \
         "'" + str(meet_id) + "', " \
         "'" + race_details[0] + "', " \
@@ -115,8 +118,8 @@ def saveRunnerDetails(runner_details, race_id, source, con):#dbconnstr):
     cur = con.cursor()
 
     cur.execute("INSERT INTO stage.runner ( " \
-        "RaceID, Result, Number, Horse, Trainer, " \
-        "Jockey, Margin, run_time, Barrier, Weight, " \
+        "RaceID, Result, Horse_number, Horse, Trainer, " \
+        "Jockey, Margin, Finish_time, Barrier, Weight, " \
         "Penalty, StartingPrice, Source, Created) VALUES ( """ \
         "'" + str(race_id) + "', " \
         "'" + runner_details[0] + "', " \

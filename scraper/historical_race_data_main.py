@@ -27,7 +27,7 @@ import datetime
 
 from race_data_postgres import *
 dbconnstr = "host ='localhost' dbname='dw' user='etl' password='etl'"
-
+from drop_rebuild import rebuild_stage_db
 
 
 # function definitions. prob put these in a separate library file at some stage
@@ -233,12 +233,12 @@ def getMeet(pageURL, state, con):
                         getRunnerDetails(row, race_id, con, win_time)
 
         except Exception:
-            print(str(Exception))
+            #print(str(Exception))
             print(pageURL)
             #raise
             #sys.exit('stopped.')
-        finally:
-            return 1
+        #finally:
+            #return 1
 
 
 def getLocationMeetDates(pageURL, state, con):
@@ -260,12 +260,19 @@ def getLocationMeetDates(pageURL, state, con):
 # get database connection
 con = getConnection(dbconnstr)
 
+con.rollback()
+
 class rol_marg:
     rolling_margin = 0
-
-  
+ 
 global recode_time_lookup
 recode_time_lookup = {'HH' : 0.1, 'NK' : 0.3, 'SHH' : 0.1, 'HD' : 0.2, 'NS' : 0.1, 'HN' : 0.2, 'LH' : 0.3, 'LN' : 0.4, 'SN' : 0.2, 'SH' :0.2, 'LR' : 0.5, 'DH' : 0.2, 'DQ' : 0}
+
+# true/false switch to drop and recreate tables.
+rebuild = False
+
+if rebuild == True:
+	rebuild_stage_db(con)
 
 # get page with all the race locations in australia
 states = ['nsw', 'victoria', 'queensland', 'act', 'south-australian', 'western-australian', 'northern-territory', 'tasmanian']
@@ -295,3 +302,4 @@ for state in states:
             else:
                 page = menudiv.li.a.get('href')
             getLocationMeetDates(page, state, con)
+       
