@@ -64,16 +64,12 @@ def getRunnerDetails(row, race_id, con, win_time):
         margin_to_winner = float(margin_to_winner)
         rolling_margin = margin_to_winner
 
-    print('1',finish_position, finish_position == '2',rolling_margin, margin_to_winner, str(float(rolling_margin) + float(margin_to_winner)))    
-
-
     if finish_position == '3':
         margin_to_winner = str(float(rolling_margin) + float(margin_to_winner))
         rolling_margin = 0
 
     rol_marg.rolling_margin = rolling_margin
 
-    print('2',finish_position, finish_position == '3', rolling_margin, margin_to_winner, str(float(rolling_margin) + float(margin_to_winner)))
     
     #convert winning_time to numeric and minutes to 60 seconds
 
@@ -216,33 +212,33 @@ def getMeet(pageURL, state, con):
         pageURL = pageURL.replace('horse-racing-results', 'horse-racing-results-print')
         pageURL = "http://www.racenet.com.au" + pageURL
         # put a try-catch around this as sometimes there's an error
-        #try:
-        page_data = urllib.request.urlopen(pageURL)
-        #page_data = page_data.replace('</b> </b>', '</b>')
-        #page_data = page_data.replace('        </b></td>', '        </td>')
-        soup = bs4.BeautifulSoup(page_data)
-        meet_id = getRaceMeetDetails(soup.title.text, state, con)
-        # now get race details
-        table_rows = soup.find_all('tr')
-        for row in table_rows:
-            # if the row's class == "again_bg_table" it's a runner row
-            if row.th != None:
-                # start of race header. get Race Details
-                detail_vars = getRaceDetails(row, meet_id, con)
-                race_id = detail_vars[0]
-                win_time = detail_vars[1]
-            elif row.has_attr('class'):
-                if row['class'][0] == 'again_bg_table':
-                    # its a runner row. get Runner details
-                    getRunnerDetails(row, race_id, con, win_time)
+        try:
+            page_data = urllib.request.urlopen(pageURL)
+            #page_data = page_data.replace('</b> </b>', '</b>')
+            #page_data = page_data.replace('        </b></td>', '        </td>')
+            soup = bs4.BeautifulSoup(page_data)
+            meet_id = getRaceMeetDetails(soup.title.text, state, con)
+            # now get race details
+            table_rows = soup.find_all('tr')
+            for row in table_rows:
+                # if the row's class == "again_bg_table" it's a runner row
+                if row.th != None:
+                    # start of race header. get Race Details
+                    detail_vars = getRaceDetails(row, meet_id, con)
+                    race_id = detail_vars[0]
+                    win_time = detail_vars[1]
+                elif row.has_attr('class'):
+                    if row['class'][0] == 'again_bg_table':
+                        # its a runner row. get Runner details
+                        getRunnerDetails(row, race_id, con, win_time)
 
-        #except Exception:
-        #    print(str(Exception))
-        #    print(pageURL)
+        except Exception:
+            print(str(Exception))
+            print(pageURL)
             #raise
             #sys.exit('stopped.')
-        #finally:
-        #    return 1
+        finally:
+            return 1
 
 
 def getLocationMeetDates(pageURL, state, con):
