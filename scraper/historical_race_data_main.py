@@ -87,7 +87,7 @@ def getRunnerDetails(row, race_id, con, win_time):
     
     name_elements = td_tags[2].text.replace('\\r\\n', '').strip().split('.')
     runner_number = name_elements[0].strip()
-    runner_name = name_elements[1].strip()
+    runner_name = str.lower(name_elements[1].strip()) #otherwise have issue with varying cases across a given name.
     trainer_name = td_tags[3].text.replace('\\r\\n', '').strip()
     jockey_name = td_tags[4].text.replace('\\r\\n', '').strip()
     starting_price = td_tags[5].text.replace('\\r\\n', '').strip()
@@ -302,4 +302,4 @@ for state in states:
             else:
                 page = menudiv.li.a.get('href')
             getLocationMeetDates(page, state, con)
-       
+con.close()       
