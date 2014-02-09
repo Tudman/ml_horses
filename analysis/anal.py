@@ -2,7 +2,9 @@
 
 import psycopg2
 import numpy
+import scipy
 from sklearn import linear_model
+
 
 #establishing database connection details
 
@@ -16,11 +18,9 @@ def getConnection(dbconnstr):
 con = getConnection(dbconnstr)
 
 '''To do'''
-#write query defs...
-#get top ten horses by count in table
-#use as list and query the db, for name, time, distance, weight, track??? ... to get array
-#transform for numpy, and other ml.
 #get paramters and (create and) load them into a table
+#bring other prediction tools.
+
 
 #sql = 'UPDATE stage.runner SET horse=lower(runner.horse);' # just making sure all the names are lowercase. comment this out if sure.
 
@@ -51,7 +51,7 @@ for row in rows:
     data_race = []
     for race_row in race_rows:
        data_race.append(race_row)
-    data_by_horse.append((horse,data_race))   
+    data_by_horse.append((horse,data_race))
 
 for i in range(len(data_by_horse)): #iterate throgh all the horses
     horse = data_by_horse[i][0] #get horses name
@@ -68,11 +68,23 @@ for i in range(len(data_by_horse)): #iterate throgh all the horses
     x2 = numpy.array(x2)
     x = numpy.vstack([x1,x2]).T
 
-    print(len(x1),len(x2),len(y))
+    print("horse: ", horse)
+    print("scikit_learn predictions")
     
-    regr = linear_model.LinearRegression()
+    regr = linear_model.LinearRegression(True,)
     regr.fit( x, y )
-    print(regr.predict([59.5, 1600]))
+    regr.get_params()
+    print("e.g., predicted time for 2050 metres @ 57.5kg:", regr.predict([57.5, 2050]), ' seconds')
+    print("e.g., predicted time for 1600 metres @ 59.5kg:", regr.predict([59.5, 1600]), ' seconds')
+
+    print("getting coefficients")
+
+    coefs = (numpy.linalg.lstsq( x, y ))
+
+    #print(str(eval(1600 * coefs[0][1]) + (59.5 * coefs[0][0])))
+    print(str((float(coefs[0][1])*1600)+ (float(coefs[0][0])*59.5)))
+
+    
        
     #do regression stuff here and store the parameters.
 
