@@ -17,7 +17,7 @@ def rebuild_stage_db(con):
                     "meetingdate date," \
                     "istrial bit(1), " \
                     "railposition character varying(100), " \
-                    "trackcurdition character varying(100), " \
+                    "trackcondition character varying(100), " \
                     "tracktype character varying(100), " \
                     "weather character varying(100), " \
                     "penetrometer character varying(100), " \
