@@ -1,3 +1,10 @@
+'''Instructions:
+Make sure you have the libraries, and test thier importing.
+This script connects to the postgre db with the horse racing data in it.
+As a proof of concept, I select the horse the the most runs, and determine the influence race distance and handicapping
+have on race time, and plug in two artificial scenarios.
+'''
+
 #importing libraries
 
 import psycopg2
@@ -81,11 +88,10 @@ for i in range(len(data_by_horse)): #iterate throgh all the horses
 
     coefs = (numpy.linalg.lstsq( x, y ))
 
-    #print(str(eval(1600 * coefs[0][1]) + (59.5 * coefs[0][0])))
     print(str((float(coefs[0][1])*1600)+ (float(coefs[0][0])*59.5)))
 
     
        
-    #do regression stuff here and store the parameters.
+    #do more regression stuff here and calculate and apply parameters to horses in upcoming races.
 
                        
