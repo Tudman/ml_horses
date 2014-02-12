@@ -90,8 +90,29 @@ for i in range(len(data_by_horse)): #iterate throgh all the horses
 
     print(str((float(coefs[0][1])*1600)+ (float(coefs[0][0])*59.5)))
 
-    
+      #do regression stuff here and store the parameters
+
+''' doing some investigations here...'''
+
+sql_rt = 'select finish_time from stage.runner'
+
+cur.execute(sql_rt)
+
+RT = cur.fetchall()
+RT_str = [str(item) for item in RT]
+RT_float = [float(str(item).strip("(''),")) for item in RT_str]
+RT_float = numpy.asarray(RT_float)
+RT_clean = RT_float[RT_float > 40] #selecting out races run in less than 40sec - some dodgy data coming down the web pipes. 
+
+_max, _min = numpy.amax(RT_clean), numpy.amin(RT_clean)
+
+hist_range = range(40,440,10)
+
+import matplotlib.pyplot as plt
+plt.hist(RT_clean, hist_range)
+plt.show()
+
        
-    #do more regression stuff here and calculate and apply parameters to horses in upcoming races.
+    #do more regression stuff, and parameter investigation here and calculate and apply parameters to horses in upcoming races.
 
                        
