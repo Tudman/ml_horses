@@ -274,7 +274,7 @@ cnn = getConnection(dbconnstr)
 # true/false switch to drop and recreate tables.
 rebuild = True
 if rebuild == True:
-    rebuild_stage_db(con)
+    rebuild_stage_db(cnn)
 
 # Start Audit Log
 global etl_run_id
